@@ -1,5 +1,24 @@
-version: "3.8"
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ci-django-container
+    environment:
+      DB_HOST: database # Changed format
+      DB_NAME: pet_store
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    networks:
+      - app-network # Add this
+    volumes:
+      - ./backend:/app
+      - ./backend/requirements.txt:/app/requirements.txt
+
   database:
     image: postgres:17-alpine
     container_name: ci-db-container
@@ -8,8 +27,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    networks:
+      - app-network # Add this
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres:/var/lib/postgresql/data
+
+networks: # Add this section
+  app-network:
+    driver: bridge
+
 volumes:
   postgres:
