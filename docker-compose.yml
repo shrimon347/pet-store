@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: ci-django-container
     environment:
       DB_HOST: database # Changed format
@@ -20,7 +20,9 @@ services:
       - ./backend/requirements.txt:/app/requirements.txt
 
   database:
-    image: postgres:17-alpine
+    build:
+      context: ./database
+      dockerfile: Dockerfile
     container_name: ci-db-container
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
