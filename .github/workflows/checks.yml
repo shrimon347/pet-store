@@ -2,7 +2,7 @@ name: Rut tests - Backend
 
 on:
   push:
-    branches: ["main", "dev","gh-actions"]
+    branches: ["main", "dev"]
     paths:
       - "backend/**"
       - "database/init.sql"
