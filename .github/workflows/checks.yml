@@ -10,7 +10,7 @@ on:
     branches: ["main", "dev"]
     paths:
       - "backend/**"
-      - "database/intt.sql"
+      - "database/init.sql"
 
 jobs:
   test-backend:
