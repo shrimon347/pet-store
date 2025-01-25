@@ -7,8 +7,8 @@ on:
       - "backend/**"
       - "database/init.sql"
   pull_request:
-    branches : ["main", "dev"]
-     paths:
+    branches: ["main", "dev"]
+    paths:
       - "backend/**"
       - "database/intt.sql"
 
