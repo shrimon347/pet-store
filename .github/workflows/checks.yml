@@ -1,16 +1,16 @@
 name: Rut tests - Backend
 
-on:
-  push:
-    branches: ["main", "dev"]
-    paths:
-      - "backend/**"
-      - "database/init.sql"
-  pull_request:
-    branches: ["main", "dev"]
-    paths:
-      - "backend/**"
-      - "database/init.sql"
+on: [push]
+  # push:
+  #   branches: ["main", "dev"]
+  #   paths:
+  #     - "backend/**"
+  #     - "database/init.sql"
+  # pull_request:
+  #   branches: ["main", "dev"]
+  #   paths:
+  #     - "backend/**"
+  #     - "database/init.sql"
 
 jobs:
   test-backend:
