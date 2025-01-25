@@ -22,13 +22,13 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy the requirements file to the container
-COPY ./backend/requirements.txt .
+COPY requirements.txt /app/requirements.txt
 
 # Install Python dependencies using the virtual environment
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Copy the entire application source code to the container
-COPY ./backend /app
+COPY . /app
 
 # Expose port 8000 for the Django development server
 EXPOSE 8000
