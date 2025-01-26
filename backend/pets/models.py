@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import date
 
 # Enum choices for pet_gender
 class PetGender(models.TextChoices):
@@ -40,3 +40,18 @@ class Pet(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def age(self):
+        """
+        Calculate the pet's age in years or months (if under 1 year).
+        """
+        today = date.today()
+        age_years = today.year - self.birthday.year - (
+            (today.month, today.day) < (self.birthday.month, self.birthday.day)
+        )
+        if age_years > 0:
+            return f"{age_years} year(s)"
+        else:
+            age_months = (today.year - self.birthday.year) * 12 + today.month - self.birthday.month
+            return f"{age_months} month(s)"
