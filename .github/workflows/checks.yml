@@ -26,6 +26,12 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-      
+      - name: Set up Database environment variables
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> $GITHUB_ENV
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Test
         run: docker compose run --rm backend sh -c "python manage.py wait_for_db && python manage.py test"
