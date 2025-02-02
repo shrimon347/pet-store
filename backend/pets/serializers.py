@@ -1,12 +1,5 @@
 from rest_framework import serializers
-
 from .models import Pet, Species
-
-
-class SpeciesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Species
-        fields = ["id", "name"]
 
 
 class PetSerializer(serializers.ModelSerializer):
@@ -25,11 +18,15 @@ class PetSerializer(serializers.ModelSerializer):
             )
         if len(value) > 255:
             raise serializers.ValidationError("Pet name cannot exceed 255 characters.")
+        
+        # Allow spaces and hyphens in pet names
         if any(char.isdigit() for char in value):
             raise serializers.ValidationError("Pet name cannot contain numbers.")
+        
         return value
 
     def validate_species(self, value):
+        """Validate species."""
         if not value:
             raise serializers.ValidationError("Species is required.")
         return value
@@ -54,42 +51,11 @@ class PetSerializer(serializers.ModelSerializer):
             )
         if len(value) > 255:
             raise serializers.ValidationError("Breed cannot exceed 255 characters.")
+        
+        # Allow letters, spaces, hyphens, and apostrophes
         import re
-
-        if not re.match(r"^[a-zA-Z\s]+$", value):
+        if not re.match(r"^[a-zA-Z\s\-']+$", value):
             raise serializers.ValidationError(
-                "Breed can only contain letters and spaces."
+                "Breed can only contain letters, spaces, hyphens, and apostrophes."
             )
         return value
-
-    def validate(self, data):
-        """
-        Cross-field validation for species and breed compatibility.
-        """
-        species = data.get("species")
-        breed = data.get("breed")
-
-        # Hardcoded species-to-breed mapping for validation
-        known_breed_species_mapping = {
-            "Dog": ["Labrador", "German Shepherd", "Poodle"],
-            "Cat": ["Siamese", "Persian", "Maine Coon"],
-        }
-
-        # Get the species name
-        species_name = species.name if isinstance(species, Species) else None
-
-        # Validate species and breed compatibility
-        if species_name and breed:
-            if species_name not in known_breed_species_mapping:
-                raise serializers.ValidationError(
-                    {"non_field_errors": f"Unknown species: {species_name}"}
-                )
-
-            if breed not in known_breed_species_mapping[species_name]:
-                raise serializers.ValidationError(
-                    {
-                        "non_field_errors": f"Breed {breed} does not match species {species_name}"
-                    }
-                )
-
-        return data

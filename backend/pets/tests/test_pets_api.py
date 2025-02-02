@@ -1,17 +1,19 @@
 from django.test import TestCase
 from pets.models import Pet, PetGender, PetStatus, Species
 from pets.serializers import PetSerializer
-from rest_framework import serializers
 
 
 class PetSerializerTests(TestCase):
     def setUp(self):
         """Initialize test data"""
+        # Creating species for testing
         self.dog_species = Species.objects.create(name="Dog")
         self.cat_species = Species.objects.create(name="Cat")
+
+        # Pass only the ID of species (no full object)
         self.valid_data = {
             "name": "Buddy",
-            "species": self.dog_species.id,
+            "species": self.cat_species.id,  # Pass the species id only
             "age": 5,
             "breed": "Labrador",
             "gender": PetGender.MALE.value,
@@ -21,17 +23,20 @@ class PetSerializerTests(TestCase):
     def test_valid_serializer_data(self):
         """Test serializer with completely valid data"""
         serializer = PetSerializer(data=self.valid_data)
-        print(serializer.is_valid())
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_name_empty(self):
+        """Test that name cannot be empty"""
         data = self.valid_data.copy()  # Make a copy to avoid modifying original
         data["name"] = ""
         serializer = PetSerializer(data=data)
         self.assertFalse(serializer.is_valid())
-        self.assertEqual(str(serializer.errors["name"][0]), "This field may not be blank.")
+        self.assertEqual(
+            str(serializer.errors["name"][0]), "This field may not be blank."
+        )
 
     def test_name_too_short(self):
+        """Test that name must be at least 2 characters long"""
         data = self.valid_data.copy()
         data["name"] = "A"
         serializer = PetSerializer(data=data)
@@ -42,6 +47,7 @@ class PetSerializerTests(TestCase):
         )
 
     def test_age_non_integer(self):
+        """Test that age must be an integer"""
         data = self.valid_data.copy()
         data["age"] = "five"
         serializer = PetSerializer(data=data)
@@ -51,6 +57,7 @@ class PetSerializerTests(TestCase):
         )
 
     def test_age_zero(self):
+        """Test that age must be greater than 0"""
         data = self.valid_data.copy()
         data["age"] = 0
         serializer = PetSerializer(data=data)
@@ -60,6 +67,7 @@ class PetSerializerTests(TestCase):
         )
 
     def test_breed_validation(self):
+        """Test that breed must be at least 2 characters long"""
         data = self.valid_data.copy()
         data["breed"] = "A"
         serializer = PetSerializer(data=data)
@@ -67,14 +75,4 @@ class PetSerializerTests(TestCase):
         self.assertEqual(
             str(serializer.errors["breed"][0]),
             "Breed must be at least 2 characters long.",
-        )
-
-    def test_species_breed_validation(self):
-        data = self.valid_data.copy()
-        data["breed"] = "Siamese"  # Cat breed with dog species
-        serializer = PetSerializer(data=data)
-        self.assertFalse(serializer.is_valid())
-        self.assertEqual(
-            str(serializer.errors["non_field_errors"][0]),
-            f"Breed Siamese does not match species Dog",
         )
