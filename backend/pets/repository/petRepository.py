@@ -1,42 +1,8 @@
 from typing import List, Optional
 
 from django.core.exceptions import ObjectDoesNotExist
-from pets.models import Pet, Species
-
-
-class SpeciesRepository:
-    """Repository layer for handling species model database operations."""
-
-    @staticmethod
-    def get_all_species() -> List[Species]:
-        """Retrieve all species from the database."""
-        return Species.objects.all()
-
-    @staticmethod
-    def get_species_by_id(species_id: int) -> Optional[Species]:
-        """Retrieve a species by ID."""
-        try:
-            return Species.objects.get(id=species_id)
-        except ObjectDoesNotExist:
-            return None
-
-    @staticmethod
-    def create_species(species_data: dict) -> Species:
-        """Create and return a new species."""
-        return Species.objects.create(**species_data)
-
-    @staticmethod
-    def update_species(species: Species, updated_data: dict) -> Species:
-        """Update an existing species."""
-        for key, value in updated_data.items():
-            setattr(species, key, value)
-        species.save()
-        return species
-
-    @staticmethod
-    def delete_species(species: Species) -> None:
-        """Delete a species from the database."""
-        species.delete()
+from pets.models import Pet, PetGender, PetStatus
+from pets.repository.speciesRepository import SpeciesRepository
 
 
 class PetRepository:
@@ -44,49 +10,98 @@ class PetRepository:
 
     @staticmethod
     def get_all_pets() -> List[Pet]:
-        """Retrieve all pets from the database."""
-        return Pet.objects.all()
+        """
+        Retrieve all pets from the database.
+        """
+        return list(Pet.objects.all())
 
     @staticmethod
     def get_pet_by_id(pet_id: int) -> Optional[Pet]:
-        """Retrieve a pet by ID."""
+        """
+        Retrieve a pet by ID.
+        Returns None if the pet does not exist.
+        """
         try:
             return Pet.objects.get(id=pet_id)
         except ObjectDoesNotExist:
             return None
 
     @staticmethod
-    def create_pet(pet_data: dict) -> Optional[Pet]:
-        """Create and return a new pet."""
-        species = pet_data.get("species")
-        
-        # Ensure species is a valid Species object
-        if not isinstance(species, Species):
-            raise ValueError("Invalid species.")
-        
+    def create_pet(
+        name: str,
+        species: str,
+        age: int,
+        breed: str,
+        gender: str,
+        status: str,
+    ) -> Pet:
+        """
+        Create and return a new pet.
+        If the species does not exist, it will be created dynamically.
+        Validates gender and status using the enums.
+        """
+        # Validate gender and status using the enums
+        if gender not in PetGender.values:
+            raise ValueError(f"Invalid gender: {gender}")
+        if status not in PetStatus.values:
+            raise ValueError(f"Invalid status: {status}")
+
+        # Use the SpeciesRepository to handle species creation or retrieval
+        species = SpeciesRepository.get_species_by_name(species)
+        if not species:
+            species = SpeciesRepository.create_species(name=species)
+
         # Create the pet
-        return Pet.objects.create(**pet_data)
+        return Pet.objects.create(
+            name=name,
+            species=species,
+            age=age,
+            breed=breed,
+            gender=gender,
+            status=status,
+        )
 
     @staticmethod
-    def update_pet(pet: Pet, updated_data: dict) -> Optional[Pet]:
-        """Update an existing pet."""
-        if "species" in updated_data:
-            species = updated_data.get("species")
-        
-        # Ensure species is a valid Species object
-        if not isinstance(species, Species):
-            raise ValueError("Invalid species.")
-        
-        updated_data["species"] = species
-    
-        # Update other fields
-        for key, value in updated_data.items():
-            setattr(pet, key, value)
-    
+    def update_pet(
+        pet: Pet,
+        name: Optional[str] = None,
+        species: Optional[str] = None,
+        age: Optional[int] = None,
+        breed: Optional[str] = None,
+        gender: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> Pet:
+        """
+        Update an existing pet.
+        If the species does not exist, it will be created dynamically.
+        Validates gender and status using the enums.
+        """
+        if name is not None:
+            pet.name = name
+        if species is not None:
+            # Use the SpeciesRepository to handle species creation or retrieval
+            species = SpeciesRepository.get_species_by_name(species)
+            if not species:
+                species = SpeciesRepository.create_species(name=species)
+            pet.species = species
+        if age is not None:
+            pet.age = age
+        if breed is not None:
+            pet.breed = breed
+        if gender is not None:
+            if gender not in PetGender.values:
+                raise ValueError(f"Invalid gender: {gender}")
+            pet.gender = gender
+        if status is not None:
+            if status not in PetStatus.values:
+                raise ValueError(f"Invalid status: {status}")
+            pet.status = status
         pet.save()
         return pet
 
     @staticmethod
     def delete_pet(pet: Pet) -> None:
-        """Delete a pet from the database."""
+        """
+        Delete a pet from the database.
+        """
         pet.delete()
