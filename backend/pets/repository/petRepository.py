@@ -9,11 +9,11 @@ class PetRepository:
     """Repository layer for handling pet model database operations."""
 
     @staticmethod
-    def get_all_pets() -> List[Pet]:
+    def get_all_pets():
         """
         Retrieve all pets from the database.
         """
-        return list(Pet.objects.all())
+        return Pet.objects.all()
 
     @staticmethod
     def get_pet_by_id(pet_id: int) -> Optional[Pet]:

@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+from pets.filters import PetFilter
 
 
 class PetListCreateAPIView(APIView):
@@ -16,12 +17,17 @@ class PetListCreateAPIView(APIView):
         Retrieve all pets using the PetService layer.
         """
         try:
-            pets = PetService.get_all_pets()
+            pets = PetService.get_all_pets().order_by('id')
+
+             # Apply filters using the FilterSet
+            pet_filter = PetFilter(request.GET, queryset=pets)
+            filtered_pets = pet_filter.qs
+
             paginator = PageNumberPagination()
             paginator.page_size = 10 # adjust if need more object per view
 
             #paginate the queryset
-            result_page = paginator.paginate_queryset(pets, request)
+            result_page = paginator.paginate_queryset(filtered_pets, request)
 
             #serlize the paginated reults
             serializer = PetSerializer(result_page, many=True)

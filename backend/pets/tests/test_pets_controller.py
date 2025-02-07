@@ -36,8 +36,8 @@ class PetAPITestCase(APITestCase):
         url = reverse("pets-list-create")  # Updated to match the URL name
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["pets"]), 1)
-        self.assertEqual(response.data["pets"][0]["name"], "Buddy")
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["name"], "Buddy")
 
     def test_create_pet_success(self):
         """
