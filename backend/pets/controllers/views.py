@@ -1,10 +1,9 @@
-from django.shortcuts import get_object_or_404
-from pets.models import Pet, Species
 from pets.serializers import PetSerializer
 from pets.services.petServices import PetService
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 
 class PetListCreateAPIView(APIView):
@@ -18,8 +17,17 @@ class PetListCreateAPIView(APIView):
         """
         try:
             pets = PetService.get_all_pets()
-            serializer = PetSerializer(pets, many=True)
-            return Response({"pets": serializer.data}, status=status.HTTP_200_OK)
+            paginator = PageNumberPagination()
+            paginator.page_size = 10 # adjust if need more object per view
+
+            #paginate the queryset
+            result_page = paginator.paginate_queryset(pets, request)
+
+            #serlize the paginated reults
+            serializer = PetSerializer(result_page, many=True)
+            #return the paginated response
+            # return Response({"pets": serializer.data}, status=status.HTTP_200_OK)
+            return paginator.get_paginated_response(serializer.data)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
