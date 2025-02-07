@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: ci-django-container
     environment:
-      DB_HOST: database # Changed format
-      DB_NAME: pet_store
+      DB_HOST: ${DB_HOST} # Changed format
+      DB_NAME: ${DB_NAME}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:

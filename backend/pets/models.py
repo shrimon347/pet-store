@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 
@@ -17,7 +19,7 @@ class PetStatus(models.TextChoices):
 
 class Species(models.Model):
     id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, null=False, blank=False)
     version = models.IntegerField(default=0)
 
     def __str__(self):
@@ -28,14 +30,10 @@ class Pet(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     species = models.ForeignKey(Species, on_delete=models.CASCADE, related_name="pets")
-    birthday = models.DateField()
-    breed = models.CharField(max_length=255, blank=True, null=True)
-    gender = models.CharField(
-        max_length=10, choices=PetGender.choices, default=PetGender.UNKNOWN
-    )
-    status = models.CharField(
-        max_length=20, choices=PetStatus.choices, default=PetStatus.AVAILABLE
-    )
+    age = models.IntegerField()
+    breed = models.CharField(max_length=255)
+    gender = models.CharField(max_length=10, choices=PetGender.choices, default=PetGender.UNKNOWN)
+    status = models.CharField(max_length=20, choices=PetStatus.choices, default=PetStatus.SOLD)
     version = models.IntegerField(default=0)
 
     def __str__(self):
